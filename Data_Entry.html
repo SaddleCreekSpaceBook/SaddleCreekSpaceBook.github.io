@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spacebook/Data Entry</title>
+    <!-- Icons import -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0,0&display=swap">
+    
+    <style>
+        /* General body styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            min-height: 100vh; 
+            overflow: hidden; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header styling */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #FFFFFF;
+            padding: 10px 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            z-index: 1000; 
+        }
+
+        /* Logo styling */
+        .header .logo {
+            height: 55px; 
+            margin-left: -20px; 
+        }
+
+        /* User info container styling */
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Space between username and icon */
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            padding-right: 30px; /* Prevent overlap with scrollbar */
+        }
+
+        /* User icon styling */
+        .header .user-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%; 
+            background-color: #ddd; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #555;
+            border: 1px solid #ccc;
+        }
+
+        /* Add padding to body to prevent overlap with fixed header */
+        body {
+            padding-top: 70px; 
+        }
+
+        /* Main menu sidebar styling */
+        .menu-sidebar {
+            width: 40px; /* Collapsed width */
+            background-color: #00843D; 
+            color: #fff;
+            padding: 20px 10px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: width 0.3s; 
+            height: calc(100vh - 70px); 
+            position: fixed;
+            top: 70px;
+            left: 0;
+            z-index: 999; 
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+        }
+
+        /* Expanded main menu sidebar */
+        .menu-sidebar.expanded {
+            width: 200px; /* Expanded width */
+        }
+
+        /* Menu item styling (hidden when collapsed) */
+        .menu-sidebar .menu-item {
+            display: none; 
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.2s ease-in-out;
+        }
+
+        /* Show menu items when sidebar is expanded */
+        .menu-sidebar.expanded .menu-item {
+            display: block; 
+        }
+
+        /* Hover effect for menu items */
+        .menu-sidebar .menu-item:hover {
+            background-color: #007336; 
+        }
+
+        /* Search and settings icons styling */
+        .menu-sidebar .search-icon,
+        .menu-sidebar .settings-icon {
+            cursor: pointer;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background 0.2s ease-in-out;
+            margin-left: -4px; 
+        }
+
+        /* Settings icon positioning */
+        .settings-icon {
+            margin-top: auto; 
+            margin-bottom: 35px; 
+        }
+
+        /* Material icons styling */
+        .material-symbols-outlined {
+            font-size: 30px; /* Icon size */
+            font-weight: 900; /* Icon weight */
+            color: #d9d9d6; /* Icon color */
+        }
+
+        /* Hover effect for icons */
+        .search-icon:hover .material-symbols-outlined,
+        .settings-icon:hover .material-symbols-outlined {
+            transform: scale(1.2); 
+            transition: transform 0.2s ease-in-out;
+        }
+
+        /* "Select Menu" sidebar styling */
+        .sidebar {
+            width: 250px;
+            background-color: #D9D9D6; 
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            transition: width 0.3s, padding 0.3s; 
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 70px); 
+            position: fixed;
+            top: 70px;
+            left: 60px; 
+            z-index: 998; /* Makes sure sidebar stays above main content */
+        }
+
+        /* Collapsed "Select Menu" sidebar */
+        .sidebar.collapsed {
+            width: 0;
+            padding: 0;
+            overflow: hidden; 
+        }
+
+        /* Styling for boxes inside the "Select Menu" sidebar */
+        .sidebar-box {
+            background-color: #fff;
+            padding: 20px; 
+            margin-bottom: 20px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); 
+            border-left: 5px solid #333; 
+            transition: transform 0.2s ease-in-out;
+        }
+
+        /* Styling for headings inside the sidebar boxes */
+        .sidebar-box h2 {
+            margin-top: 0;
+            font-size: 18px; 
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #00843D; 
+            padding-bottom: 5px;
+        }
+
+        /* Styling for dropdowns inside the sidebar boxes */
+        .sidebar-box select {
+            width: 100%;
+            padding: 12px; 
+            margin-bottom: 10px;
+            border: 2px solid black;
+            border-radius: 5px;
+            background-color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        /* Focus effect for dropdowns */
+        .sidebar-box select:focus {
+            border-color: #00843D; 
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 132, 61, 0.6); 
+        }
+
+        /* Access Granted indicator styling */
+        .access-indicator {
+            font-size: 14px;
+            color: green;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        /* No access indicator syling */
+        .access-indicator.no-access {
+            color: red;
+        }
+
+        /* Styling for additional info inside the sidebar */
+        .sidebar-info {
+            font-size: 14px;
+            margin-top: 10px;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #00843D; 
+        }
+
+        /* Paragraph styling inside the sidebar info */
+        .sidebar-info p {
+            margin: 5px 0;
+        }
+
+        /* "Open Data Entry" button styling */
+        .sidebar button {
+            background-color: #333;
+            color: #fff;
+            cursor: pointer;
+            margin-top: auto;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.2s ease-in-out;
+            margin-top: 8px; 
+        }
+
+        /* Main content area styling */
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
+            padding-left: 100px; 
+            transition: margin-left 0.3s ease-in-out; 
+            text-align: left; 
+        }
+
+        /* Center data entry table when the sidebar is collapsed */
+        .sidebar.collapsed + .main-content .data-entry-table {
+            margin: 0 auto; 
+            text-align: left; 
+        }
+
+        /* Data entry table styling */
+        .data-entry-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        /* Data Entry Table header and cell styling */
+        .data-entry-table th, .data-entry-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        /* Data Entry Table header background */
+        .data-entry-table th {
+            background-color: #f2f2f2;
+        }
+
+        /* Sidebar tab styling */
+        .sidebar-tab {
+            position: fixed;
+            left: 0;
+            top: 14%;
+            transform: translateX(15%);
+            width: 30px;
+            height: 50px;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            line-height: 50px;
+            cursor: pointer;
+            border-radius: 0 5px 5px 0;
+            font-weight: bold;
+            display: none; /* Hidden by default */
+        }
+
+        /* Adjust sidebar tab position when sidebar is collapsed */
+        .sidebar.collapsed ~ .sidebar-tab {
+            left: 50px; 
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <header class="header">
+        <img src="Images/Saddle-Creek-Logo.png" alt="Company Logo" class="logo"> <!-- Company logo -->
+        <div class="user-info">
+            <div class="user-details">
+                <div>Username</div>
+                <div style="font-size: 12px; color: gray;">Position</div>
+            </div>
+            <div class="user-icon">👤</div> <!-- User icon placeholder -->
+        </div>
+    </header>
+
+    <!-- "Main Menu" Sidebar -->
+    <div class="menu-sidebar" id="menuSidebar">
+        <div class="search-icon" id="searchIcon">
+            <span class="material-symbols-outlined">search</span> <!-- Search icon -->
+        </div>        
+        <div class="menu-item">
+            <span>Option 1</span> <!-- Menu option 1 -->
+        </div>
+        <div class="menu-item">
+            <span>Option 2</span> <!-- Menu option 2 -->
+        </div>
+        <div class="menu-item">
+            <span>Option 3</span> <!-- Menu option 3 -->
+        </div>
+        <div class="settings-icon" id="settingsIcon">
+            <span class="material-symbols-outlined">settings</span> <!-- Settings icon -->
+        </div>
+    </div>
+
+    <!-- "Select Menu" Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-box">
+            <h2>Select Campus</h2>
+            <select id="campusSelect">
+                <option value="campus1">Campus 1</option>
+                <option value="campus2">Campus 2</option>
+            </select>
+            <div class="access-indicator" id="campusAccess">Access Granted</div>
+            <div class="sidebar-info">
+                <p><strong>Campus Code:</strong> C1</p>
+                <p><strong>Total Buildings:</strong> 5</p>
+                <p><strong>Total Space:</strong> 10,000 sq ft</p>
+            </div>
+        </div>
+        <div class="sidebar-box">
+            <h2>Select Building</h2>
+            <select id="buildingSelect">
+                <option value="building1">Building 1</option>
+                <option value="building2">Building 2</option>
+            </select>
+            <div class="access-indicator" id="buildingAccess">Access Granted</div>
+            <div class="sidebar-info">
+                <p><strong>Building Code:</strong> B1</p>
+                <p><strong>Capacity:</strong> 500</p>
+                <p><strong>Total Space:</strong> 2,000 sq ft</p>
+                <p><strong>Last Modified:</strong> 2023-10-01</p>
+            </div>
+        </div>
+        <button id="openDataEntry">Open Data Entry</button> <!-- Open Data Entry Button -->
+    </div>
+
+    <!-- "Select Menu" Sidebar Tab -->
+    <div class="sidebar-tab" id="sidebarTab">&#9664;</div> <!-- Tab to expand/collapse sidebar -->
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Data Entry Table</h1>
+        <table class="data-entry-table" id="dataTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Dimension</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Length</td>
+                    <td>Placeholder</td>
+                </tr>
+                <tr>
+                    <td>Width</td>
+                    <td>Placeholder</td>
+                </tr>
+                <tr>
+                    <td>Height</td>
+                    <td>Placeholder</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Toggle main menu sidebar
+        document.getElementById('searchIcon').addEventListener('click', function() {
+            const menuSidebar = document.getElementById('menuSidebar');
+            menuSidebar.classList.toggle('expanded');
+        });
+
+        // Toggle "Select Menu" sidebar
+        document.getElementById('openDataEntry').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.add('collapsed');
+            document.getElementById('sidebarTab').style.display = 'block'; // Show tab
+            document.getElementById('dataTable').style.display = 'table';
+        });
+
+        // Expand "Select Menu" sidebar when tab is clicked
+        document.getElementById('sidebarTab').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('collapsed');
+            document.getElementById('sidebarTab').style.display = 'none'; // Hide tab
+        });
+
+        // Example logic for access indicators
+        document.getElementById('campusSelect').addEventListener('change', function() {
+            const accessIndicator = document.getElementById('campusAccess');
+            accessIndicator.textContent = this.value === 'campus1' ? 'Access Granted' : 'No Access';
+            accessIndicator.classList.toggle('no-access', this.value !== 'campus1');
+        });
+
+        // Example logic for building access indicators
+        document.getElementById('buildingSelect').addEventListener('change', function() {
+            const accessIndicator = document.getElementById('buildingAccess');
+            accessIndicator.textContent = this.value === 'building1' ? 'Access Granted' : 'No Access';
+            accessIndicator.classList.toggle('no-access', this.value !== 'building1');
+        });
+    </script>
+</body>
+</html>
