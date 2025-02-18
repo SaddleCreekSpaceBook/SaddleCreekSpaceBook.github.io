@@ -18,6 +18,7 @@
             overflow: hidden; 
             display: flex;
             flex-direction: column;
+            padding-top: 70px; /* Leaves space for the fixed header */
         }
 
         /* Header styling */
@@ -65,11 +66,6 @@
             font-size: 18px;
             color: #555;
             border: 1px solid #ccc;
-        }
-
-        /* Add padding to body to prevent overlap with fixed header */
-        body {
-            padding-top: 70px; 
         }
 
         /* Main menu sidebar styling */
@@ -139,7 +135,7 @@
             color: #d9d9d6; /* Icon color */
         }
 
-        /* Hover effect for icons */
+        /* Hover effect for main menu icons (Search & Settings) */
         .search-icon:hover .material-symbols-outlined,
         .settings-icon:hover .material-symbols-outlined {
             transform: scale(1.2); 
@@ -159,7 +155,7 @@
             position: fixed;
             top: 70px;
             left: 60px; 
-            z-index: 998; /* Makes sure sidebar stays above main content */
+            z-index: 998; 
         }
 
         /* Collapsed "Select Menu" sidebar */
@@ -169,7 +165,7 @@
             overflow: hidden; 
         }
 
-        /* Styling for boxes inside the "Select Menu" sidebar */
+        /* Boxes inside the "Select Menu" sidebar */
         .sidebar-box {
             background-color: #fff;
             padding: 20px; 
@@ -180,7 +176,7 @@
             transition: transform 0.2s ease-in-out;
         }
 
-        /* Styling for headings inside the sidebar boxes */
+        /* Headings in the sidebar boxes */
         .sidebar-box h2 {
             margin-top: 0;
             font-size: 18px; 
@@ -190,7 +186,7 @@
             padding-bottom: 5px;
         }
 
-        /* Styling for dropdowns inside the sidebar boxes */
+        /* Dropdowns inside the sidebar boxes */
         .sidebar-box select {
             width: 100%;
             padding: 12px; 
@@ -211,7 +207,7 @@
             box-shadow: 0 0 5px rgba(0, 132, 61, 0.6); 
         }
 
-        /* Access Granted indicator styling */
+        /* Access Granted indicator */
         .access-indicator {
             font-size: 14px;
             color: green;
@@ -219,12 +215,12 @@
             font-weight: bold;
         }
 
-        /* No access indicator syling */
+        /* No access indicator */
         .access-indicator.no-access {
             color: red;
         }
 
-        /* Styling for additional info inside the sidebar */
+        /* Additional info in the sidebar */
         .sidebar-info {
             font-size: 14px;
             margin-top: 10px;
@@ -234,12 +230,11 @@
             border-left: 3px solid #00843D; 
         }
 
-        /* Paragraph styling inside the sidebar info */
         .sidebar-info p {
             margin: 5px 0;
         }
 
-        /* "Open Data Entry" button styling */
+        /* "Open Data Entry" button */
         .sidebar button {
             background-color: #333;
             color: #fff;
@@ -249,11 +244,15 @@
             border: none;
             border-radius: 5px;
             font-weight: bold;
-            transition: background 0.2s ease-in-out;
             margin-top: 8px; 
+            transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+        .sidebar button:hover {
+            transform: scale(1.05);
+            background-color: #444;
         }
 
-        /* Main content area styling */
+        /* Main content area */
         .main-content {
             flex-grow: 1;
             padding: 20px;
@@ -262,7 +261,7 @@
             text-align: left; 
         }
 
-        /* Center data entry table when the sidebar is collapsed */
+        /* Center data entry table when sidebar is collapsed */
         .sidebar.collapsed + .main-content .data-entry-table {
             margin: 0 auto; 
             text-align: left; 
@@ -275,14 +274,12 @@
             margin-top: 20px;
         }
 
-        /* Data Entry Table header and cell styling */
         .data-entry-table th, .data-entry-table td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
         }
 
-        /* Data Entry Table header background */
         .data-entry-table th {
             background-color: #f2f2f2;
         }
@@ -304,42 +301,64 @@
             font-weight: bold;
             display: none; /* Hidden by default */
         }
-
-        /* Adjust sidebar tab position when sidebar is collapsed */
         .sidebar.collapsed ~ .sidebar-tab {
             left: 50px; 
+        }
+
+        /* Action buttons below the data table */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: flex-start; 
+        }
+
+        /* Action button styling */
+        .action-buttons button {
+            background-color: #333;
+            color: #fff;
+            cursor: pointer;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+        .action-buttons button:hover {
+            transform: scale(1.05);
+            background-color: #444;
         }
     </style>
 </head>
 <body>
     <!-- Header Section -->
     <header class="header">
-        <img src="Images/Saddle-Creek-Logo.png" alt="Company Logo" class="logo"> <!-- Company logo -->
+        <img src="Images/Saddle-Creek-Logo.png" alt="Company Logo" class="logo">
         <div class="user-info">
             <div class="user-details">
                 <div>Username</div>
                 <div style="font-size: 12px; color: gray;">Position</div>
             </div>
-            <div class="user-icon">👤</div> <!-- User icon placeholder -->
+            <div class="user-icon">👤</div>
         </div>
     </header>
 
-    <!-- "Main Menu" Sidebar -->
+    <!-- Main Menu Sidebar -->
     <div class="menu-sidebar" id="menuSidebar">
         <div class="search-icon" id="searchIcon">
-            <span class="material-symbols-outlined">search</span> <!-- Search icon -->
+            <span class="material-symbols-outlined">search</span>
         </div>        
         <div class="menu-item">
-            <span>Option 1</span> <!-- Menu option 1 -->
+            <span>Option 1</span>
         </div>
         <div class="menu-item">
-            <span>Option 2</span> <!-- Menu option 2 -->
+            <span>Option 2</span>
         </div>
         <div class="menu-item">
-            <span>Option 3</span> <!-- Menu option 3 -->
+            <span>Option 3</span>
         </div>
         <div class="settings-icon" id="settingsIcon">
-            <span class="material-symbols-outlined">settings</span> <!-- Settings icon -->
+            <span class="material-symbols-outlined">settings</span>
         </div>
     </div>
 
@@ -372,11 +391,11 @@
                 <p><strong>Last Modified:</strong> 2023-10-01</p>
             </div>
         </div>
-        <button id="openDataEntry">Open Data Entry</button> <!-- Open Data Entry Button -->
+        <button id="openDataEntry">Open Data Entry</button>
     </div>
 
-    <!-- "Select Menu" Sidebar Tab -->
-    <div class="sidebar-tab" id="sidebarTab">&#9664;</div> <!-- Tab to expand/collapse sidebar -->
+    <!-- Sidebar Tab to Re-Expand -->
+    <div class="sidebar-tab" id="sidebarTab">&#9664;</div>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -384,25 +403,53 @@
         <table class="data-entry-table" id="dataTable" style="display: none;">
             <thead>
                 <tr>
-                    <th>Dimension</th>
-                    <th>Value</th>
+                    <th>Rows/Bays</th>
+                    <th>Client A</th>
+                    <th>Client B</th>
+                    <th>Client C</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>Length</td>
-                    <td>Placeholder</td>
+                    <td>Zone A - 001</td>
+                    <td contenteditable="true">-</td>
+                    <td contenteditable="true">-</td>
+                    <td contenteditable="true">-</td>
                 </tr>
                 <tr>
-                    <td>Width</td>
-                    <td>Placeholder</td>
+                    <td>Zone A - 002</td>
+                    <td contenteditable="true">-</td>
+                    <td contenteditable="true">-</td>
+                    <td contenteditable="true">-</td>
                 </tr>
                 <tr>
-                    <td>Height</td>
-                    <td>Placeholder</td>
+                    <td>Zone B - 001</td>
+                    <td contenteditable="true">-</td>
+                    <td contenteditable="true">-</td>
+                    <td contenteditable="true">-</td>
+                </tr>
+                <tr>
+                    <td>Zone B - 002</td>
+                    <td contenteditable="true">-</td>
+                    <td contenteditable="true">-</td>
+                    <td contenteditable="true">-</td>
+                </tr>
+                <tr>
+                    <td>Zone C - 001</td>
+                    <td contenteditable="true">-</td>
+                    <td contenteditable="true">-</td>
+                    <td contenteditable="true">-</td>
                 </tr>
             </tbody>
         </table>
+
+        <!-- Four Action Buttons Below the Data Entry Table -->
+        <div class="action-buttons" id="actionButtons" style="display: none;">
+            <button id="saveWork">Save Work</button>
+            <button id="submitComplete">Submit Building as Complete</button>
+            <button id="exportSheet">Export Inventory Sheet</button>
+            <button id="cancel">Cancel</button>
+        </div>
     </div>
 
     <script>
@@ -412,20 +459,21 @@
             menuSidebar.classList.toggle('expanded');
         });
 
-        // Toggle "Select Menu" sidebar
+        // Collapse "Select Menu" sidebar & show table + action buttons
         document.getElementById('openDataEntry').addEventListener('click', function() {
             document.getElementById('sidebar').classList.add('collapsed');
-            document.getElementById('sidebarTab').style.display = 'block'; // Show tab
+            document.getElementById('sidebarTab').style.display = 'block'; 
             document.getElementById('dataTable').style.display = 'table';
+            document.getElementById('actionButtons').style.display = 'flex'; 
         });
 
-        // Expand "Select Menu" sidebar when tab is clicked
+        // Re-expand "Select Menu" sidebar when tab is clicked
         document.getElementById('sidebarTab').addEventListener('click', function() {
             document.getElementById('sidebar').classList.remove('collapsed');
-            document.getElementById('sidebarTab').style.display = 'none'; // Hide tab
+            document.getElementById('sidebarTab').style.display = 'none'; 
         });
 
-        // Example logic for access indicators
+        // Example logic for campus access indicators
         document.getElementById('campusSelect').addEventListener('change', function() {
             const accessIndicator = document.getElementById('campusAccess');
             accessIndicator.textContent = this.value === 'campus1' ? 'Access Granted' : 'No Access';
