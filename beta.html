@@ -94,12 +94,20 @@
             display: flex;
             flex-direction: column;
             align-items: center; 
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            justify-content: space-between; /* Ensures top options and settings icon are spaced */
+            height: calc(100vh - 70px); 
+            overflow-y: auto; /* Enables scrolling if content overflows */
         }
 
-        /* Expanded main menu sidebar */
-        .menu-sidebar.expanded {
-            width: 200px; 
-        }
+            .settings-icon {
+                padding: 10px;
+                cursor: pointer;
+                margin-bottom: 10px; /* Adds some spacing from the bottom */
+            }
+
 
         /* Menu item styling (hidden when collapsed) */
         .menu-sidebar .menu-item {
