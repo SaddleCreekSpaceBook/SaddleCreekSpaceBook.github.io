@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Row Management Page</title>
+  <!-- Material Symbols for icons -->
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0,0&display=swap"
+  />
+  <style>
+    /* Global Styles */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      min-height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      padding-top: 70px; /* Space for the fixed header */
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #FFFFFF;
+      padding: 10px 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      z-index: 1000;
+    }
+    .header .logo {
+      height: 55px;
+      margin-left: -20px;
+    }
+    .header .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      padding-right: 30px;
+    }
+    .header .user-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background-color: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #555;
+      border: 1px solid #ccc;
+    }
+
+    /* Main Menu Sidebar */
+    .menu-sidebar {
+      width: 40px;
+      background-color: #00843D;
+      color: #fff;
+      padding: 20px 10px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      transition: width 0.3s;
+      height: calc(100vh - 70px);
+      position: fixed;
+      top: 70px;
+      left: 0;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .menu-sidebar.expanded {
+      width: 200px;
+    }
+    .menu-sidebar .menu-item {
+      display: none;
+      padding: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.2s ease-in-out;
+    }
+    .menu-sidebar.expanded .menu-item {
+      display: block;
+    }
+    .menu-sidebar .menu-item:hover {
+      background-color: #007336;
+    }
+    .menu-sidebar .search-icon,
+    .menu-sidebar .settings-icon {
+      cursor: pointer;
+      text-align: center;
+      padding: 10px;
+      border-radius: 5px;
+      transition: background 0.2s ease-in-out;
+      margin-left: -4px;
+    }
+    .settings-icon {
+      margin-top: auto;
+      margin-bottom: 35px;
+    }
+    .material-symbols-outlined {
+      font-size: 30px;
+      font-weight: 900;
+      color: #d9d9d6;
+    }
+    .search-icon:hover .material-symbols-outlined,
+    .settings-icon:hover .material-symbols-outlined {
+      transform: scale(1.2);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    /* Tab Container */
+    .tab-container {
+      margin: 10px 20px 20px 70px; /* Space for main menu sidebar */
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+    }
+    .tabs-wrapper {
+      background-color: #f4f4f4;
+      padding: 4px 4px 0;
+    }
+    .tabs {
+      display: flex;
+      gap: 2px;
+    }
+    .tab-item {
+      text-align: center;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      font-weight: 500;
+      border-radius: 4px 4px 0 0;
+      background-color: #f2f2f2;
+      color: #666;
+    }
+    .tab-item:hover {
+      background-color: #e3e3e3;
+    }
+    .tab-item.active {
+      background-color: #e6f8ed;
+      color: #00602b;
+      font-weight: bold;
+      border-bottom: 3px solid #00843D;
+    }
+    .tab-content {
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    /* Row Management Styles */
+    .row-management-container {
+      display: flex;
+      width: 100%; 
+      margin: 0; 
+      padding: 0; 
+      overflow: hidden; 
+    }
+    .row-sidebar {
+      width: 250px;
+      background-color: #D9D9D6;
+      padding: 20px;
+      flex-shrink: 0; 
+      transition: width 0.3s, padding 0.3s;
+    }
+    .row-sidebar.collapsed {
+      width: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    .sidebar-box {
+      background-color: #fff;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      border-left: 5px solid #333;
+    }
+    .sidebar-box h2 {
+      margin-top: 0;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+      border-bottom: 2px solid #00843D;
+      padding-bottom: 5px;
+    }
+    .sidebar-box select {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 2px solid black;
+      border-radius: 5px;
+      background-color: white;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+    }
+    .sidebar-box select:focus {
+      border-color: #00843D;
+      outline: none;
+      box-shadow: 0 0 5px rgba(0,132,61,0.6);
+    }
+    .access-indicator {
+      font-size: 14px;
+      color: green;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    .access-indicator.no-access {
+      color: red;
+    }
+    .sidebar-info {
+      font-size: 14px;
+      margin-top: 10px;
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 5px;
+      border-left: 3px solid #00843D;
+    }
+    .sidebar-info p {
+      margin: 5px 0;
+    }
+    .row-sidebar button {
+      width: 100%;
+      background-color: #333;
+      color: #fff;
+      cursor: pointer;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      font-size: 16px;
+      transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
+    }
+    .row-sidebar button:hover {
+      transform: scale(1.05);
+      background-color: #444;
+    }
+
+    .row-main {
+      flex-grow: 1;
+      padding: 20px;
+      background-color: #fff;
+    }
+    .row-sidebar-tab {
+      display: none; 
+      width: 30px;
+      height: 50px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      line-height: 50px;
+      cursor: pointer;
+      border-radius: 0 5px 5px 0;
+      margin-left: 10px;
+      margin-top: 20px;
+      font-weight: bold;
+      align-self: start; 
+    }
+    .row-sidebar.collapsed + .row-sidebar-tab {
+      display: inline-block;
+    }
+
+    /* Table and Buttons styling */
+    .data-entry-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .data-entry-table th, .data-entry-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    .data-entry-table th {
+      background-color: #f2f2f2;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      justify-content: flex-start; 
+    }
+    .action-buttons button {
+      background-color: #333;
+      color: #fff;
+      cursor: pointer;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
+    }
+    .action-buttons button:hover {
+      transform: scale(1.05);
+      background-color: #444;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <img src="Images/Saddle-Creek-Logo.png" alt="Company Logo" class="logo" />
+    <div class="user-info">
+      <div class="user-details">
+        <div>Username</div>
+        <div style="font-size: 12px; color: gray;">Position</div>
+      </div>
+      <div class="user-icon">👤</div>
+    </div>
+  </header>
+
+  <!-- Main Menu Sidebar -->
+  <div class="menu-sidebar" id="menuSidebar">
+    <div class="search-icon" id="searchIcon">
+      <span class="material-symbols-outlined">search</span>
+    </div>
+    <div class="menu-item">
+      <span>Option 1</span>
+    </div>
+    <div class="menu-item">
+      <span>Option 2</span>
+    </div>
+    <div class="menu-item">
+      <span>Option 3</span>
+    </div>
+    <div class="settings-icon" id="settingsIcon">
+      <span class="material-symbols-outlined">settings</span>
+    </div>
+  </div>
+
+  <!-- Tab Container -->
+  <div class="tab-container" id="tabContainer">
+    <div class="tabs-wrapper">
+      <div class="tabs">
+        <div class="tab-item" id="manageCampusTab">Manage Campus</div>
+        <div class="tab-item" id="manageBuildingsTab">Manage Buildings</div>
+        <div class="tab-item active" id="manageRowsTab">Manage Rows</div>
+        <div class="tab-item" id="manageCustomersTab">Manage Customers</div>
+        <div class="tab-item" id="manageAssociationsTab">Manage Associations</div>
+      </div>
+    </div>
+    <div class="tab-content" id="tabContent">
+      <!-- Content dynamically loaded based on active tab -->
+    </div>
+  </div>
+
+  <script>
+    // Toggle expansion of the main menu sidebar
+    document.getElementById('searchIcon').addEventListener('click', function() {
+      document.getElementById('menuSidebar').classList.toggle('expanded');
+    });
+
+    // Tab switching logic
+    const tabs = document.querySelectorAll('.tab-item');
+    const tabContent = document.getElementById('tabContent');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        loadContent(this.id);
+      });
+    });
+
+    function loadContent(tabId) {
+      let content = '';
+      switch(tabId) {
+        case 'manageCampusTab':
+          content = '<h2>Manage Campus</h2><p>Content for managing campus information.</p>';
+          break;
+        case 'manageBuildingsTab':
+          content = '<h2>Manage Buildings</h2><p>Content for managing building information.</p>';
+          break;
+        case 'manageRowsTab':
+          content = `
+            <div class="row-management-container">
+              <div class="row-sidebar" id="rowSidebar">
+                <div class="sidebar-box">
+                  <h2>Select Campus</h2>
+                  <select id="campusSelect">
+                    <option value="campus1">Campus 1</option>
+                    <option value="campus2">Campus 2</option>
+                  </select>
+                  <div class="access-indicator" id="campusAccess">Access Granted</div>
+                  <div class="sidebar-info">
+                    <p><strong>Campus Code:</strong> C1</p>
+                    <p><strong>Total Buildings:</strong> 5</p>
+                    <p><strong>Total Space:</strong> 10,000 sq ft</p>
+                  </div>
+                </div>
+                <div class="sidebar-box">
+                  <h2>Select Building</h2>
+                  <select id="buildingSelect">
+                    <option value="building1">Building 1</option>
+                    <option value="building2">Building 2</option>
+                  </select>
+                  <div class="access-indicator" id="buildingAccess">Access Granted</div>
+                  <div class="sidebar-info">
+                    <p><strong>Building Code:</strong> B1</p>
+                    <p><strong>Capacity:</strong> 500</p>
+                    <p><strong>Total Space:</strong> 2,000 sq ft</p>
+                    <p><strong>Last Modified:</strong> 2023-10-01</p>
+                  </div>
+                </div>
+                <button id="openRowManagement">Open Row Management</button>
+              </div>
+              <div class="row-sidebar-tab" id="rowSidebarTab">&#9664;</div>
+              <div class="row-main" id="rowMain">
+                <!-- Initially blank. The table will be injected here. -->
+              </div>
+            </div>`;
+          break;
+        case 'manageCustomersTab':
+          content = '<h2>Manage Customers</h2><p>Content for managing customer information.</p>';
+          break;
+        case 'manageAssociationsTab':
+          content = '<h2>Manage Associations</h2><p>Content for managing associations.</p>';
+          break;
+      }
+      tabContent.innerHTML = content;
+
+      // event listeners for the row sidebar
+      if (tabId === 'manageRowsTab') {
+        const rowSidebar = document.getElementById('rowSidebar');
+        const rowSidebarTab = document.getElementById('rowSidebarTab');
+        const rowMain = document.getElementById('rowMain');
+
+        // Collapse sidebar 
+        document.getElementById('openRowManagement').addEventListener('click', function() {
+          rowSidebar.classList.add('collapsed');
+          rowSidebarTab.style.display = 'inline-block';
+
+          // Row management table and buttons
+          rowMain.innerHTML = `
+            <h2>Row Management Table</h2>
+            <table class="data-entry-table" id="rowManagementTable">
+              <thead>
+                <tr>
+                  <th>Row Name</th>
+                  <th>Storage Type</th>
+                  <th>Number of Bays</th>
+                  <th>Depth (Pallets)</th>
+                  <th>Depth (Feet)</th>
+                  <th>Width (Feet)</th>
+                  <th>Aisle Depth (Feet)</th>
+                  <th>Has Common Space</th>
+                  <th>Active</th>
+                  <th>Storage Space</th>
+                  <th>Aisle Space</th>
+                  <th>Work Space</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Sample row; each cell can be contenteditable if desired -->
+                <tr>
+                  <td contenteditable="true">Row A</td>
+                  <td contenteditable="true">Rack</td>
+                  <td contenteditable="true">10</td>
+                  <td contenteditable="true">2</td>
+                  <td contenteditable="true">40</td>
+                  <td contenteditable="true">10</td>
+                  <td contenteditable="true">5</td>
+                  <td contenteditable="true">Yes</td>
+                  <td contenteditable="true">Yes</td>
+                  <td contenteditable="true">400</td>
+                  <td contenteditable="true">200</td>
+                  <td contenteditable="true">100</td>
+                </tr>
+                <tr>
+                  <td contenteditable="true">Row B</td>
+                  <td contenteditable="true">Shelf</td>
+                  <td contenteditable="true">8</td>
+                  <td contenteditable="true">3</td>
+                  <td contenteditable="true">35</td>
+                  <td contenteditable="true">12</td>
+                  <td contenteditable="true">6</td>
+                  <td contenteditable="true">No</td>
+                  <td contenteditable="true">Yes</td>
+                  <td contenteditable="true">350</td>
+                  <td contenteditable="true">180</td>
+                  <td contenteditable="true">90</td>
+                </tr>
+                <tr>
+                  <td contenteditable="true">Row C</td>
+                  <td contenteditable="true">Pallet</td>
+                  <td contenteditable="true">12</td>
+                  <td contenteditable="true">4</td>
+                  <td contenteditable="true">45</td>
+                  <td contenteditable="true">15</td>
+                  <td contenteditable="true">7</td>
+                  <td contenteditable="true">Yes</td>
+                  <td contenteditable="true">No</td>
+                  <td contenteditable="true">500</td>
+                  <td contenteditable="true">250</td>
+                  <td contenteditable="true">120</td>
+                </tr>
+                <tr>
+                  <td contenteditable="true">Row D</td>
+                  <td contenteditable="true">Pallet</td>
+                  <td contenteditable="true">9</td>
+                  <td contenteditable="true">3</td>
+                  <td contenteditable="true">30</td>
+                  <td contenteditable="true">11</td>
+                  <td contenteditable="true">5</td>
+                  <td contenteditable="true">No</td>
+                  <td contenteditable="true">Yes</td>
+                  <td contenteditable="true">420</td>
+                  <td contenteditable="true">210</td>
+                  <td contenteditable="true">105</td>
+                </tr>
+                <tr>
+                  <td contenteditable="true">Row E</td>
+                  <td contenteditable="true">Rack</td>
+                  <td contenteditable="true">7</td>
+                  <td contenteditable="true">2</td>
+                  <td contenteditable="true">38</td>
+                  <td contenteditable="true">9</td>
+                  <td contenteditable="true">4</td>
+                  <td contenteditable="true">Yes</td>
+                  <td contenteditable="true">Yes</td>
+                  <td contenteditable="true">390</td>
+                  <td contenteditable="true">195</td>
+                  <td contenteditable="true">95</td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="action-buttons">
+              <button id="newRow">New Row</button>
+              <button id="submitRow">Submit</button>
+              <button id="cancelRow">Cancel</button>
+            </div>
+          `;
+
+          // logic for "New Row" button
+          document.getElementById('newRow').addEventListener('click', function() {
+            const tableBody = document.querySelector('#rowManagementTable tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+              <td contenteditable="true">New Row</td>
+              <td contenteditable="true"></td>
+              <td contenteditable="true"></td>
+              <td contenteditable="true"></td>
+              <td contenteditable="true"></td>
+              <td contenteditable="true"></td>
+              <td contenteditable="true"></td>
+              <td contenteditable="true"></td>
+              <td contenteditable="true"></td>
+              <td contenteditable="true"></td>
+              <td contenteditable="true"></td>
+              <td contenteditable="true"></td>
+            `;
+            tableBody.appendChild(newRow);
+          });
+
+          // event listeners for "Submit" & "Cancel
+          document.getElementById('submitRow').addEventListener('click', function() {
+            alert('Submit clicked! (Add your logic here.)');
+          });
+          document.getElementById('cancelRow').addEventListener('click', function() {
+            alert('Cancel clicked! (Add your logic here.)');
+          });
+        });
+
+        // Re-expand sidebar
+        rowSidebarTab.addEventListener('click', function() {
+          rowSidebar.classList.remove('collapsed');
+          rowSidebarTab.style.display = 'none';
+        });
+
+        // Example campus select logic
+        const campusSelect = document.getElementById('campusSelect');
+        const campusAccess = document.getElementById('campusAccess');
+        campusSelect.addEventListener('change', function() {
+          if (this.value === 'campus1') {
+            campusAccess.textContent = 'Access Granted';
+            campusAccess.classList.remove('no-access');
+          } else {
+            campusAccess.textContent = 'No Access';
+            campusAccess.classList.add('no-access');
+          }
+        });
+
+        // Example building select logic
+        const buildingSelect = document.getElementById('buildingSelect');
+        const buildingAccess = document.getElementById('buildingAccess');
+        buildingSelect.addEventListener('change', function() {
+          if (this.value === 'building1') {
+            buildingAccess.textContent = 'Access Granted';
+            buildingAccess.classList.remove('no-access');
+          } else {
+            buildingAccess.textContent = 'No Access';
+            buildingAccess.classList.add('no-access');
+          }
+        });
+      }
+    }
+
+    // Load initial content (default tab)
+    loadContent('manageCampusTab');
+  </script>
+</body>
+</html>
