@@ -159,9 +159,6 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: relative;
     }
-
-
-
   </style>
 </head>
 <body>
@@ -200,9 +197,9 @@
   <div class="tab-container" id="tabContainer">
     <div class="tabs-wrapper">
       <div class="tabs">
-        <div class="tab-item active" id="manageCampusTab">Manage Campus</div>
+        <!-- Removed the Manage Campus tab -->
         <div class="tab-item" id="manageBuildingsTab">Manage Buildings</div>
-        <div class="tab-item" id="manageRowsTab">Manage Rows</div>
+        <div class="tab-item active" id="manageWarehouseTab">Manage Warehouse</div>
         <div class="tab-item" id="manageCustomersTab">Manage Customers</div>
         <div class="tab-item" id="manageAssociationsTab">Manage Associations</div>
       </div>
@@ -225,14 +222,11 @@
     function loadContent(tabId) {
       let content = '';
       switch(tabId) {
-        case 'manageCampusTab':
-          content = '<h2>Manage Campus</h2><p>Content for managing campus information.</p>';
-          break;
         case 'manageBuildingsTab':
           content = '<h2>Manage Buildings</h2><p>Content for managing building information.</p>';
           break;
-        case 'manageRowsTab':
-          content = '<h2>Manage Rows</h2><p>Content for managing row information.</p>';
+        case 'manageWarehouseTab':
+          content = '<h2>Manage Warehouse</h2><p>Content for managing warehouse information.</p>';
           break;
         case 'manageCustomersTab':
           content = '<h2>Manage Customers</h2><p>Content for managing customer information.</p>';
@@ -244,7 +238,7 @@
       tabContent.innerHTML = content;
     }
 
-    // tab click events
+    // Tab click events
     tabs.forEach(tab => {
       tab.addEventListener('click', function() {
         tabs.forEach(t => t.classList.remove('active'));
@@ -253,7 +247,8 @@
       });
     });
 
-    loadContent('manageCampusTab');
+    // Set default active tab and load its content
+    loadContent('manageBuildingsTab');
   </script>
 </body>
 </html>
