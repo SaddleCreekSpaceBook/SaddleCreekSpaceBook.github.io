@@ -3,13 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Row Management Page</title>
-  <!-- Material Symbols for icons -->
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0,0&display=swap"
-  />
+  <!-- Updated Page Title -->
+  <title>Warehouse Mangement</title>
+
+  <!-- Material Symbols for "delete" icon (static font example) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0,0&display=swap" />
   <style>
+    .material-symbols-outlined {
+      /* Make sure we use the correct variation settings for the icon */
+      font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24;
+    }
+
     /* Global Styles */
     body {
       font-family: Arial, sans-serif;
@@ -111,11 +119,6 @@
       margin-top: auto;
       margin-bottom: 35px;
     }
-    .material-symbols-outlined {
-      font-size: 30px;
-      font-weight: 900;
-      color: #d9d9d6;
-    }
     .search-icon:hover .material-symbols-outlined,
     .settings-icon:hover .material-symbols-outlined {
       transform: scale(1.2);
@@ -161,21 +164,23 @@
       padding: 20px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: relative;
+      margin: 0;
+      padding-left: 0.5;
     }
 
     /* Row Management Styles */
     .row-management-container {
       display: flex;
-      width: 100%; 
-      margin: 0; 
-      padding: 0; 
-      overflow: hidden; 
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
     }
     .row-sidebar {
       width: 250px;
       background-color: #D9D9D6;
       padding: 20px;
-      flex-shrink: 0; 
+      flex-shrink: 0;
       transition: width 0.3s, padding 0.3s;
     }
     .row-sidebar.collapsed {
@@ -257,9 +262,10 @@
       flex-grow: 1;
       padding: 20px;
       background-color: #fff;
+      position: relative;
     }
     .row-sidebar-tab {
-      display: none; 
+      display: none;
       width: 30px;
       height: 50px;
       background-color: #333;
@@ -271,10 +277,13 @@
       margin-left: 10px;
       margin-top: 20px;
       font-weight: bold;
-      align-self: start; 
+      align-self: start;
     }
     .row-sidebar.collapsed + .row-sidebar-tab {
       display: inline-block;
+    }
+    .row-sidebar.collapsed ~ .row-main {
+      transform: translateY(-10px);
     }
 
     /* Table and Buttons styling */
@@ -286,31 +295,172 @@
     .data-entry-table th, .data-entry-table td {
       border: 1px solid #ddd;
       padding: 8px;
-      text-align: left;
+      text-align: center;
+      font-size: 16px;
+      vertical-align: middle;
     }
     .data-entry-table th {
       background-color: #f2f2f2;
+      font-size: 17px;
+    }
+
+    /*
+      TRASH CAN ICON STYLES
+      'trash-cell' is a normal <td> but acts as if outside the table
+        (the user sees no border for that area).
+      - The confirmation box is shown to the LEFT to avoid cutoff.
+    */
+    .trash-cell {
+      position: relative;
+      border: none !important;
+      background: none !important;
+      width: 0;
+      padding: 0 !important;
+    }
+    .delete-icon {
+      color: #bbb;
+      cursor: pointer;
+      transition: color 0.2s ease-in-out, transform 0.2s ease-in-out;
+      margin-left: 10px;
+      transform: scale(0.8);
+    }
+    .delete-icon:hover {
+      color: #888;
+      transform: scale(1.1);
+    }
+    .delete-confirmation {
+      display: none;
+      position: absolute;
+      top: 50%;
+      right: 35px;
+      transform: translateY(-50%);
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 5px 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      font-size: 16px;
+      white-space: nowrap;
+    }
+    .delete-confirmation span {
+      margin: 0 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .delete-confirmation .yes-confirm {
+      color: green;
+    }
+    .delete-confirmation .no-confirm {
+      color: red;
+    }
+
+    /* Custom Combo Box Styles for "Storage Type" */
+    .combo-container {
+      position: relative;
+      width: 100%;
+    }
+    .combo-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 5px;
+      font-size: inherit;
+      font-family: inherit;
+      border: none;
+      background: none;
+    }
+    .combo-input:focus {
+      outline: 2px solid #00843D;
+    }
+    .combo-arrow {
+      position: absolute;
+      right: 5px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-weight: bold;
+      user-select: none;
+    }
+    .combo-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      border: 1px solid #ccc;
+      background: white;
+      max-height: 150px;
+      overflow-y: auto;
+      display: none;
+      z-index: 999;
+    }
+    .combo-item {
+      padding: 5px;
+      cursor: pointer;
+      font-size: inherit;
+      font-family: inherit;
+    }
+    .combo-item:hover {
+      background: #eee;
+    }
+
+    /* Toggle Checkbox Styles for "Has Common Space" and "Active" */
+    .toggle-checkbox {
+      width: 30px;
+      height: 30px;
+      text-align: center;
+      line-height: 30px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    .toggle-checkbox.yes {
+      background-color: #d4edda;
+      color: green;
+    }
+    .toggle-checkbox.no {
+      background-color: #f8d7da;
+      color: red;
     }
 
     .action-buttons {
       display: flex;
-      gap: 15px;
+      justify-content: space-between;
       margin-top: 20px;
-      justify-content: flex-start; 
+    }
+    .action-buttons-left, .action-buttons-right {
+      display: flex;
+      gap: 15px;
     }
     .action-buttons button {
-      background-color: #333;
       color: #fff;
       cursor: pointer;
-      padding: 10px 20px;
+      padding: 8px 15px;
       border: none;
       border-radius: 5px;
       font-weight: bold;
+      font-size: 16px;
       transition: background 0.2s ease-in-out, transform 0.2s ease-in-out;
     }
-    .action-buttons button:hover {
+    #newRow, #deleteRow {
+      background-color: #333;
+    }
+    #newRow:hover, #deleteRow:hover {
       transform: scale(1.05);
       background-color: #444;
+    }
+    #cancelRow {
+      background-color: rgb(177, 59, 59);
+    }
+    #cancelRow:hover {
+      transform: scale(1.05);
+      background-color: darkred;
+    }
+    #submitRow {
+      background-color: green;
+    }
+    #submitRow:hover {
+      transform: scale(1.05);
+      background-color: darkgreen;
     }
   </style>
 </head>
@@ -350,9 +500,9 @@
   <div class="tab-container" id="tabContainer">
     <div class="tabs-wrapper">
       <div class="tabs">
-        <div class="tab-item" id="manageCampusTab">Manage Campus</div>
         <div class="tab-item" id="manageBuildingsTab">Manage Buildings</div>
-        <div class="tab-item active" id="manageRowsTab">Manage Rows</div>
+        <!-- Renamed the tab to "Manage Warehouse" -->
+        <div class="tab-item active" id="manageRowsTab">Manage Warehouse</div>
         <div class="tab-item" id="manageCustomersTab">Manage Customers</div>
         <div class="tab-item" id="manageAssociationsTab">Manage Associations</div>
       </div>
@@ -363,6 +513,20 @@
   </div>
 
   <script>
+    // Storage Type Options
+    const STORAGE_TYPES = [
+      "Rack",
+      "Floor",
+      "Stage",
+      "Undeveloped",
+      "Office",
+      "VAS/Multipack",
+      "Case Flow",
+      "Pallet Flow",
+      "Bin Farm",
+      "QA/QC"
+    ];
+
     // Toggle expansion of the main menu sidebar
     document.getElementById('searchIcon').addEventListener('click', function() {
       document.getElementById('menuSidebar').classList.toggle('expanded');
@@ -383,13 +547,11 @@
     function loadContent(tabId) {
       let content = '';
       switch(tabId) {
-        case 'manageCampusTab':
-          content = '<h2>Manage Campus</h2><p>Content for managing campus information.</p>';
-          break;
         case 'manageBuildingsTab':
           content = '<h2>Manage Buildings</h2><p>Content for managing building information.</p>';
           break;
         case 'manageRowsTab':
+          // The main content for "Manage Warehouse"
           content = `
             <div class="row-management-container">
               <div class="row-sidebar" id="rowSidebar">
@@ -424,9 +586,10 @@
               </div>
               <div class="row-sidebar-tab" id="rowSidebarTab">&#9664;</div>
               <div class="row-main" id="rowMain">
-                <!-- Initially blank. The table will be injected here. -->
+                <!-- The table will be injected here. -->
               </div>
-            </div>`;
+            </div>
+          `;
           break;
         case 'manageCustomersTab':
           content = '<h2>Manage Customers</h2><p>Content for managing customer information.</p>';
@@ -437,18 +600,18 @@
       }
       tabContent.innerHTML = content;
 
-      // event listeners for the row sidebar
+      // Event listeners for the row sidebar (only for "Manage Warehouse" tab)
       if (tabId === 'manageRowsTab') {
         const rowSidebar = document.getElementById('rowSidebar');
         const rowSidebarTab = document.getElementById('rowSidebarTab');
         const rowMain = document.getElementById('rowMain');
 
-        // Collapse sidebar 
+        // Collapse sidebar when "Open Row Management" is clicked
         document.getElementById('openRowManagement').addEventListener('click', function() {
           rowSidebar.classList.add('collapsed');
           rowSidebarTab.style.display = 'inline-block';
 
-          // Row management table and buttons
+          // Inject the row management table with several sample rows
           rowMain.innerHTML = `
             <h2>Row Management Table</h2>
             <table class="data-entry-table" id="rowManagementTable">
@@ -463,114 +626,191 @@
                   <th>Aisle Depth (Feet)</th>
                   <th>Has Common Space</th>
                   <th>Active</th>
+                  <!-- Make these columns non-editable -->
                   <th>Storage Space</th>
                   <th>Aisle Space</th>
                   <th>Work Space</th>
+                  <th class="trash-cell"></th>
                 </tr>
               </thead>
               <tbody>
-                <!-- Sample row; each cell can be contenteditable if desired -->
                 <tr>
                   <td contenteditable="true">Row A</td>
-                  <td contenteditable="true">Rack</td>
+                  <td>${createComboBoxHTML("Rack")}</td>
                   <td contenteditable="true">10</td>
                   <td contenteditable="true">2</td>
                   <td contenteditable="true">40</td>
                   <td contenteditable="true">10</td>
                   <td contenteditable="true">5</td>
-                  <td contenteditable="true">Yes</td>
-                  <td contenteditable="true">Yes</td>
-                  <td contenteditable="true">400</td>
-                  <td contenteditable="true">200</td>
-                  <td contenteditable="true">100</td>
+                  <td><div class="toggle-checkbox no" onclick="toggleCheckbox(this)">✗</div></td>
+                  <td><div class="toggle-checkbox no" onclick="toggleCheckbox(this)">✗</div></td>
+                  <!-- Removed contenteditable from these three columns -->
+                  <td>400</td>
+                  <td>200</td>
+                  <td>100</td>
+                  <td class="trash-cell">
+                    <span class="material-symbols-outlined delete-icon" onclick="showDeleteConfirmation(this)">delete</span>
+                    <div class="delete-confirmation">
+                      Delete row?
+                      <span class="yes-confirm" onclick="confirmDeleteRow(this)">✓</span>
+                      <span class="no-confirm" onclick="cancelDeleteRow(this)">✗</span>
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <td contenteditable="true">Row B</td>
-                  <td contenteditable="true">Shelf</td>
+                  <td>${createComboBoxHTML("Floor")}</td>
                   <td contenteditable="true">8</td>
                   <td contenteditable="true">3</td>
                   <td contenteditable="true">35</td>
                   <td contenteditable="true">12</td>
                   <td contenteditable="true">6</td>
-                  <td contenteditable="true">No</td>
-                  <td contenteditable="true">Yes</td>
-                  <td contenteditable="true">350</td>
-                  <td contenteditable="true">180</td>
-                  <td contenteditable="true">90</td>
+                  <td><div class="toggle-checkbox no" onclick="toggleCheckbox(this)">✗</div></td>
+                  <td><div class="toggle-checkbox no" onclick="toggleCheckbox(this)">✗</div></td>
+                  <td>350</td>
+                  <td>180</td>
+                  <td>90</td>
+                  <td class="trash-cell">
+                    <span class="material-symbols-outlined delete-icon" onclick="showDeleteConfirmation(this)">delete</span>
+                    <div class="delete-confirmation">
+                      Delete row?
+                      <span class="yes-confirm" onclick="confirmDeleteRow(this)">✓</span>
+                      <span class="no-confirm" onclick="cancelDeleteRow(this)">✗</span>
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <td contenteditable="true">Row C</td>
-                  <td contenteditable="true">Pallet</td>
+                  <td>${createComboBoxHTML("Stage")}</td>
                   <td contenteditable="true">12</td>
                   <td contenteditable="true">4</td>
                   <td contenteditable="true">45</td>
                   <td contenteditable="true">15</td>
                   <td contenteditable="true">7</td>
-                  <td contenteditable="true">Yes</td>
-                  <td contenteditable="true">No</td>
-                  <td contenteditable="true">500</td>
-                  <td contenteditable="true">250</td>
-                  <td contenteditable="true">120</td>
+                  <td><div class="toggle-checkbox no" onclick="toggleCheckbox(this)">✗</div></td>
+                  <td><div class="toggle-checkbox no" onclick="toggleCheckbox(this)">✗</div></td>
+                  <td>500</td>
+                  <td>250</td>
+                  <td>120</td>
+                  <td class="trash-cell">
+                    <span class="material-symbols-outlined delete-icon" onclick="showDeleteConfirmation(this)">delete</span>
+                    <div class="delete-confirmation">
+                      Delete row?
+                      <span class="yes-confirm" onclick="confirmDeleteRow(this)">✓</span>
+                      <span class="no-confirm" onclick="cancelDeleteRow(this)">✗</span>
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <td contenteditable="true">Row D</td>
-                  <td contenteditable="true">Pallet</td>
+                  <td>${createComboBoxHTML("Undeveloped")}</td>
                   <td contenteditable="true">9</td>
                   <td contenteditable="true">3</td>
                   <td contenteditable="true">30</td>
                   <td contenteditable="true">11</td>
                   <td contenteditable="true">5</td>
-                  <td contenteditable="true">No</td>
-                  <td contenteditable="true">Yes</td>
-                  <td contenteditable="true">420</td>
-                  <td contenteditable="true">210</td>
-                  <td contenteditable="true">105</td>
+                  <td><div class="toggle-checkbox no" onclick="toggleCheckbox(this)">✗</div></td>
+                  <td><div class="toggle-checkbox yes" onclick="toggleCheckbox(this)">✓</div></td>
+                  <td>420</td>
+                  <td>210</td>
+                  <td>105</td>
+                  <td class="trash-cell">
+                    <span class="material-symbols-outlined delete-icon" onclick="showDeleteConfirmation(this)">delete</span>
+                    <div class="delete-confirmation">
+                      Delete row?
+                      <span class="yes-confirm" onclick="confirmDeleteRow(this)">✓</span>
+                      <span class="no-confirm" onclick="cancelDeleteRow(this)">✗</span>
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <td contenteditable="true">Row E</td>
-                  <td contenteditable="true">Rack</td>
+                  <td>${createComboBoxHTML("Office")}</td>
                   <td contenteditable="true">7</td>
                   <td contenteditable="true">2</td>
                   <td contenteditable="true">38</td>
                   <td contenteditable="true">9</td>
                   <td contenteditable="true">4</td>
-                  <td contenteditable="true">Yes</td>
-                  <td contenteditable="true">Yes</td>
-                  <td contenteditable="true">390</td>
-                  <td contenteditable="true">195</td>
-                  <td contenteditable="true">95</td>
+                  <td><div class="toggle-checkbox yes" onclick="toggleCheckbox(this)">✓</div></td>
+                  <td><div class="toggle-checkbox yes" onclick="toggleCheckbox(this)">✓</div></td>
+                  <td>390</td>
+                  <td>195</td>
+                  <td>95</td>
+                  <td class="trash-cell">
+                    <span class="material-symbols-outlined delete-icon" onclick="showDeleteConfirmation(this)">delete</span>
+                    <div class="delete-confirmation">
+                      Delete row?
+                      <span class="yes-confirm" onclick="confirmDeleteRow(this)">✓</span>
+                      <span class="no-confirm" onclick="cancelDeleteRow(this)">✗</span>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
+
             <div class="action-buttons">
-              <button id="newRow">New Row</button>
-              <button id="submitRow">Submit</button>
-              <button id="cancelRow">Cancel</button>
+              <div class="action-buttons-left">
+                <button id="newRow">New Row</button>
+                <button id="deleteRow">Delete Last Row</button>
+              </div>
+              <div class="action-buttons-right">
+                <button id="cancelRow">Cancel</button>
+                <button id="submitRow">Submit</button>
+              </div>
             </div>
           `;
 
-          // logic for "New Row" button
+          // Initialize combo boxes in the table
+          setupAllComboBoxes();
+
+          // "New Row" logic
           document.getElementById('newRow').addEventListener('click', function() {
             const tableBody = document.querySelector('#rowManagementTable tbody');
             const newRow = document.createElement('tr');
+            newRow.classList.add('new-row');
+            // Note: Storage/Aisle/Work Space columns are NOT editable
             newRow.innerHTML = `
               <td contenteditable="true">New Row</td>
+              <td>${createComboBoxHTML("Rack")}</td>
               <td contenteditable="true"></td>
               <td contenteditable="true"></td>
               <td contenteditable="true"></td>
               <td contenteditable="true"></td>
               <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
-              <td contenteditable="true"></td>
+              <td><div class="toggle-checkbox no" onclick="toggleCheckbox(this)">✗</div></td>
+              <td><div class="toggle-checkbox no" onclick="toggleCheckbox(this)">✗</div></td>
+              <td></td>  <!-- No contenteditable here -->
+              <td></td>  <!-- No contenteditable here -->
+              <td></td>  <!-- No contenteditable here -->
+              <td class="trash-cell">
+                <span class="material-symbols-outlined delete-icon" onclick="showDeleteConfirmation(this)">delete</span>
+                <div class="delete-confirmation">
+                  Delete row?
+                  <span class="yes-confirm" onclick="confirmDeleteRow(this)">✓</span>
+                  <span class="no-confirm" onclick="cancelDeleteRow(this)">✗</span>
+                </div>
+              </td>
             `;
             tableBody.appendChild(newRow);
+
+            // Initialize combo box in the new row
+            const comboContainer = newRow.querySelector('.combo-container');
+            initComboBox(comboContainer);
           });
 
-          // event listeners for "Submit" & "Cancel
+          // "Delete Last Row" logic
+          document.getElementById('deleteRow').addEventListener('click', function() {
+            const tableBody = document.querySelector('#rowManagementTable tbody');
+            const newRows = tableBody.querySelectorAll('tr.new-row');
+            if (newRows.length > 0) {
+              const lastNewRow = newRows[newRows.length - 1];
+              tableBody.removeChild(lastNewRow);
+            } else {
+              alert('No new rows to delete!');
+            }
+          });
+
+          // SUBMIT & CANCEL logic
           document.getElementById('submitRow').addEventListener('click', function() {
             alert('Submit clicked! (Add your logic here.)');
           });
@@ -579,13 +819,13 @@
           });
         });
 
-        // Re-expand sidebar
+        // Re-expand sidebar when clicking the sidebar tab
         rowSidebarTab.addEventListener('click', function() {
           rowSidebar.classList.remove('collapsed');
           rowSidebarTab.style.display = 'none';
         });
 
-        // Example campus select logic
+        // Campus select logic
         const campusSelect = document.getElementById('campusSelect');
         const campusAccess = document.getElementById('campusAccess');
         campusSelect.addEventListener('change', function() {
@@ -598,7 +838,7 @@
           }
         });
 
-        // Example building select logic
+        // Building select logic
         const buildingSelect = document.getElementById('buildingSelect');
         const buildingAccess = document.getElementById('buildingAccess');
         buildingSelect.addEventListener('change', function() {
@@ -614,7 +854,118 @@
     }
 
     // Load initial content (default tab)
-    loadContent('manageCampusTab');
+    loadContent('manageBuildingsTab');
+
+    /*
+     * CUSTOM COMBOBOX IMPLEMENTATION*/
+    function createComboBoxHTML(defaultValue) {
+      return `
+        <div class="combo-container" data-default="${defaultValue}">
+          <input type="text" class="combo-input" placeholder="Type or click ↓" />
+          <div class="combo-arrow">&#9662;</div>
+          <div class="combo-list"></div>
+        </div>
+      `;
+    }
+
+    function setupAllComboBoxes() {
+      const comboContainers = document.querySelectorAll('.combo-container');
+      comboContainers.forEach(container => {
+        initComboBox(container);
+      });
+    }
+
+    function initComboBox(container) {
+      const input = container.querySelector('.combo-input');
+      const arrow = container.querySelector('.combo-arrow');
+      const comboList = container.querySelector('.combo-list');
+      const defaultVal = container.getAttribute('data-default') || '';
+
+      // Populate the comboList
+      comboList.innerHTML = STORAGE_TYPES.map(type => {
+        return `<div class="combo-item">${type}</div>`;
+      }).join('');
+
+      // Set default value
+      input.value = defaultVal;
+
+      const comboItems = comboList.querySelectorAll('.combo-item');
+
+      // Show/hide the list
+      function toggleList() {
+        if (comboList.style.display !== 'block') {
+          comboItems.forEach(item => (item.style.display = 'block'));
+        }
+        comboList.style.display = (comboList.style.display === 'block') ? 'none' : 'block';
+      }
+
+      arrow.addEventListener('click', () => {
+        toggleList();
+      });
+
+      input.addEventListener('focus', () => {
+        comboItems.forEach(item => (item.style.display = 'block'));
+        comboList.style.display = 'block';
+      });
+
+      input.addEventListener('input', () => {
+        filterList(input.value);
+      });
+
+      function filterList(text) {
+        comboItems.forEach(item => {
+          const itemText = item.textContent.toLowerCase();
+          item.style.display = itemText.includes(text.toLowerCase()) ? 'block' : 'none';
+        });
+      }
+
+      comboItems.forEach(item => {
+        item.addEventListener('click', () => {
+          input.value = item.textContent;
+          comboList.style.display = 'none';
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!container.contains(e.target)) {
+          comboList.style.display = 'none';
+        }
+      });
+    }
+
+    /*
+     *TOGGLE CHECKBOX IMPLEMENTATION*/
+    function toggleCheckbox(elem) {
+      if (elem.classList.contains('yes')) {
+        elem.classList.remove('yes');
+        elem.classList.add('no');
+        elem.textContent = "✗";
+      } else {
+        elem.classList.remove('no');
+        elem.classList.add('yes');
+        elem.textContent = "✓";
+      }
+    }
+
+    /*
+     * TRASHCAN ICON DELETE IMPLEMENTATION*/
+    // Show the confirmation box
+    function showDeleteConfirmation(iconElem) {
+      const confirmation = iconElem.parentNode.querySelector('.delete-confirmation');
+      confirmation.style.display = 'block';
+    }
+
+    // User clicks green check => remove entire row
+    function confirmDeleteRow(yesElem) {
+      const row = yesElem.closest('tr');
+      row.parentNode.removeChild(row);
+    }
+
+    // User clicks red cross => hide confirmation
+    function cancelDeleteRow(noElem) {
+      const confirmation = noElem.closest('.delete-confirmation');
+      confirmation.style.display = 'none';
+    }
   </script>
 </body>
 </html>
