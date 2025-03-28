@@ -57,7 +57,6 @@
       flex-direction: column;
     }
 
-    /* Tabs Styles */
     .tabs-wrapper {
       display: flex;
       flex-direction: column;
@@ -86,7 +85,6 @@
       border-radius: 4px;
     }
 
-    /* Dropdown Styles */
     .dropdown {
       background-color: #f2f2f2;
       border: 1px solid #ccc;
@@ -97,43 +95,66 @@
       width: 100%;
     }
 
-    .dropdown:hover {
-      background-color: #e3e3e3;
-      border-color: #00843D;
+    #campusSearch {
+      max-width: 400px;
     }
 
-    /* Input Fields for Campus Details */
     .campus-details {
       margin-top: 20px;
-      display: none; /* Hidden by default */
+      display: none;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    .campus-details input,
+    .campus-details label {
+      font-weight: bold;
+      margin-top: 12px;
+      display: block;
+    }
+
+    .campus-details input[type="text"],
     .campus-details button {
       width: 100%;
       padding: 10px;
-      margin: 10px 0;
+      margin-top: 6px;
+      margin-bottom: 14px;
       border-radius: 4px;
       border: 1px solid #ccc;
       font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .campus-details input[type="checkbox"] {
+      width: auto;
+      margin-left: 0;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
     }
 
     .campus-details button {
       background-color: #00843D;
       color: white;
+      border: none;
       cursor: pointer;
+      transition: background-color 0.2s ease;
     }
 
     .campus-details button:hover {
       background-color: #00602b;
     }
 
-    .campus-details label {
-      font-weight: bold;
-    }
-
-    .checkbox-label {
-      font-weight: normal;
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
     }
   </style>
 </head>
@@ -180,6 +201,13 @@
           <option value="Campus 3">
         </datalist>
 
+        <!-- Add New Campus BELOW search -->
+        <button id="toggleAddCampus" style="margin: 10px 0; background-color: #00602b; color: white; padding: 8px 12px; border: none; border-radius: 4px;">+ Add New Campus</button>
+        <div id="newCampusForm" style="display: none; margin-bottom: 15px;">
+          <input type="text" id="newCampusInput" placeholder="Enter new campus name" class="dropdown" style="max-width: 400px;" />
+          <button id="addCampusBtn" style="margin-top: 8px; background-color: #00843D; color: white; padding: 8px 16px; border: none; border-radius: 4px;">Add Campus</button>
+        </div>
+
         <div id="campusDetails" class="campus-details">
           <label for="campusName">Campus Name:</label>
           <input type="text" id="campusName" placeholder="Enter campus name" />
@@ -190,17 +218,18 @@
           <label for="costCenter">Cost Center:</label>
           <input type="text" id="costCenter" placeholder="Enter cost center" />
 
-          <!-- Is Campus Active Checkbox -->
-          <label for="isActive" class="checkbox-label">
-            <input type="checkbox" id="isActive" /> Is Active
-          </label>
+          <div class="checkbox-row">
+            <input type="checkbox" id="isActive" />
+            <label for="isActive">Is Active</label>
+          </div>
 
-          <button id="submitCampus">Submit</button>
-          <button id="cancelCampus">Cancel</button>
+          <div class="form-actions">
+            <button id="submitCampus">Submit</button>
+            <button id="cancelCampus">Cancel</button>
+          </div>
         </div>
       </div>
 
-      <!-- Other tabs content (hidden by default) -->
       <div class="tab-pane" id="manageCustomerClassesTabContent" style="display:none;">Manage Customer Classes Content</div>
       <div class="tab-pane" id="manageStorageTypesTabContent" style="display:none;">Manage Storage Types Content</div>
       <div class="tab-pane" id="manageUsersTabContent" style="display:none;">Manage Users Content</div>
@@ -209,12 +238,12 @@
   </div>
 
   <script>
-    // Tab switching functionality
     const tabs = document.querySelectorAll('.tab-item');
     const tabContents = document.querySelectorAll('.tab-pane');
+    const campusDataStore = {};
 
     tabs.forEach(tab => {
-      tab.addEventListener('click', function() {
+      tab.addEventListener('click', function () {
         tabs.forEach(item => item.classList.remove('active'));
         tab.classList.add('active');
 
@@ -224,13 +253,11 @@
       });
     });
 
-    // Campus search and reset logic
-    document.getElementById("campusSearch").addEventListener("input", function() {
+    document.getElementById("campusSearch").addEventListener("input", function () {
       const selectedValue = this.value;
       const dataList = document.getElementById("campusList").options;
       let isValid = false;
 
-      // Loop through the options in the datalist to check if the selected campus is valid
       for (let i = 0; i < dataList.length; i++) {
         if (dataList[i].value === selectedValue) {
           isValid = true;
@@ -238,36 +265,84 @@
         }
       }
 
-      // If valid campus name is selected, display the details and autofill the campus name
-      if (isValid) {
+      if (isValid || campusDataStore[selectedValue]) {
         document.getElementById("campusDetails").style.display = "block";
-        document.getElementById("campusName").value = selectedValue;
 
-        // Reset code and cost center entries when campus changes
-        document.getElementById("campusCode").value = "";
-        document.getElementById("costCenter").value = "";
-        document.getElementById("isActive").checked = false; // Reset the checkbox
+        if (campusDataStore[selectedValue]) {
+          const saved = campusDataStore[selectedValue];
+          document.getElementById("campusName").value = saved.name;
+          document.getElementById("campusCode").value = saved.code;
+          document.getElementById("costCenter").value = saved.cost;
+          document.getElementById("isActive").checked = saved.active;
+        } else {
+          document.getElementById("campusName").value = selectedValue;
+          document.getElementById("campusCode").value = "";
+          document.getElementById("costCenter").value = "";
+          document.getElementById("isActive").checked = false;
+        }
       } else {
-        // Hide the campus details section when invalid campus name is selected
         document.getElementById("campusDetails").style.display = "none";
       }
     });
 
-    // Submit and Cancel buttons logic
-    document.getElementById("submitCampus").addEventListener("click", function() {
-      const isActive = document.getElementById("isActive").checked ? "Active" : "Inactive";
-      alert(`Campus submitted! Status: ${isActive}`);
-      // You can add further logic to handle the submission here
+    document.getElementById("submitCampus").addEventListener("click", function () {
+      const key = document.getElementById("campusSearch").value;
+      if (!key) return alert("Please select a campus.");
+
+      campusDataStore[key] = {
+        name: document.getElementById("campusName").value,
+        code: document.getElementById("campusCode").value,
+        cost: document.getElementById("costCenter").value,
+        active: document.getElementById("isActive").checked,
+      };
+
+      alert(`Campus '${key}' saved successfully!`);
     });
 
-    document.getElementById("cancelCampus").addEventListener("click", function() {
-      // Reset the input fields when Cancel is clicked
+    document.getElementById("cancelCampus").addEventListener("click", function () {
       document.getElementById("campusSearch").value = "";
       document.getElementById("campusName").value = "";
       document.getElementById("campusCode").value = "";
       document.getElementById("costCenter").value = "";
-      document.getElementById("isActive").checked = false; // Reset the checkbox
+      document.getElementById("isActive").checked = false;
       document.getElementById("campusDetails").style.display = "none";
+    });
+
+    // Add new campus functionality
+    document.getElementById("toggleAddCampus").addEventListener("click", () => {
+      const form = document.getElementById("newCampusForm");
+      form.style.display = form.style.display === "none" ? "block" : "none";
+    });
+
+    document.getElementById("addCampusBtn").addEventListener("click", () => {
+      const input = document.getElementById("newCampusInput");
+      const newCampusName = input.value.trim();
+
+      if (!newCampusName) {
+        alert("Please enter a campus name.");
+        return;
+      }
+
+      const datalist = document.getElementById("campusList");
+      const exists = Array.from(datalist.options).some(option => option.value === newCampusName);
+      if (exists) {
+        alert("Campus already exists.");
+        return;
+      }
+
+      const option = document.createElement("option");
+      option.value = newCampusName;
+      datalist.appendChild(option);
+
+      document.getElementById("campusSearch").value = newCampusName;
+      document.getElementById("campusDetails").style.display = "block";
+      document.getElementById("campusName").value = newCampusName;
+      document.getElementById("campusCode").value = "";
+      document.getElementById("costCenter").value = "";
+      document.getElementById("isActive").checked = false;
+
+      input.value = "";
+      document.getElementById("newCampusForm").style.display = "none";
     });
   </script>
 </body>
