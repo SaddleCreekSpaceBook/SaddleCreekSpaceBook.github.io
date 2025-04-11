@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f4f4;
+      padding: 70px 20px 20px;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #FFFFFF;
+      padding: 10px 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      z-index: 1000;
+    }
+    .header .logo {
+      height: 55px;
+      margin-left: -20px;
+    }
+    .header .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      padding-right: 30px;
+    }
+    .header .user-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background-color: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #555;
+      border: 1px solid #ccc;
+    }
+
+    /* Settings Container */
+    .settings-container {
+      max-width: 500px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .settings-option {
+      background-color: #f2f2f2;
+      padding: 12px 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .settings-option:hover {
+      background-color: #e6f8ed;
+    }
+
+    .logout-btn {
+      background-color: #c0392b;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    .logout-btn:hover {
+      background-color: #962d22;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 100px auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      position: relative;
+    }
+
+    .close {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #999;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: #333;
+    }
+
+    .modal input[type="text"],
+    .modal input[type="password"],
+    .modal input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .modal button {
+      background-color: #00843D;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin-top: 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .modal button:hover {
+      background-color: #00602b;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <img src="https://github.com/SaddleCreekSpaceBook/SaddleCreekSpaceBook.github.io/blob/main/img/Saddle-Creek-Logo.png?raw=true" alt="Company Logo" class="logo" />
+    <div class="user-info">
+      <div class="user-details">
+        <div>Username</div>
+        <div style="font-size: 12px; color: gray;">Position</div>
+      </div>
+      <div class="user-icon">👤</div>
+    </div>
+  </header>
+
+  <!-- Settings Container -->
+  <div class="settings-container">
+    <h2>Account Settings</h2>
+
+    <div class="settings-option" onclick="openModal('nicknameModal')">Change Nickname</div>
+    <div class="settings-option" onclick="openModal('profileModal')">Change Profile Picture</div>
+    <div class="settings-option" onclick="openModal('passwordModal')">Change Password</div>
+    <div class="settings-option" onclick="openModal('PhoneModal')">Update Phone Number</div>
+
+    <!-- Return to Home Button -->
+    <button class="logout-btn" style="background-color: #00843D; margin-bottom: 10px;" onclick="Home_Page.html">Return to Home Page</button>
+
+    <button class="logout-btn" onclick="login.html">Logout</button>
+  </div>
+
+  <!-- Modals -->
+  <div class="modal" id="nicknameModal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('nicknameModal')">&times;</span>
+      <h3>Change Nickname</h3>
+      <input type="text" id="newNickname" placeholder="Enter new nickname">
+      <button onclick="saveNickname()">Save</button>
+    </div>
+  </div>
+
+  <div class="modal" id="profileModal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('profileModal')">&times;</span>
+      <h3>Change Profile Picture</h3>
+      <input type="file" id="newProfilePic">
+      <button onclick="saveProfilePic()">Upload</button>
+    </div>
+  </div>
+
+  <div class="modal" id="passwordModal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('passwordModal')">&times;</span>
+      <h3>Change Password</h3>
+      <input type="password" id="newPassword" placeholder="Enter new password">
+      <button onclick="savePassword()">Change</button>
+    </div>
+  </div>
+
+  <!-- Phone Modal -->
+  <div class="modal" id="PhoneModal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('PhoneModal')">&times;</span>
+      <h4>Update Phone Number</h4>
+      <input type="text" id="newPhone" placeholder="Enter your Phone Number">
+      <button onclick="savePhone()">Save</button>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      document.getElementById(id).style.display = "block";
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).style.display = "none";
+    }
+
+    function logout() {
+      window.location.href = "Home_Page.html";
+    }
+
+    function goHome() {
+      window.location.href = "Home_Page.html";
+    }
+
+    function saveNickname() {
+      const nickname = document.getElementById("newNickname").value;
+      alert("Nickname changed to: " + nickname);
+      closeModal('nicknameModal');
+    }
+
+    function saveProfilePic() {
+      const file = document.getElementById("newProfilePic").files[0];
+      if (file) {
+        alert("Profile picture uploaded: " + file.name);
+      } else {
+        alert("No file selected.");
+      }
+      closeModal('profileModal');
+    }
+
+    function savePassword() {
+      const password = document.getElementById("newPassword").value;
+      alert("Password changed!");
+      closeModal('passwordModal');
+    }
+
+    function savePhone() {
+      const phone = document.getElementById("newPhone").value;
+      alert("Phone Number changed!");
+      closeModal('PhoneModal');
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+      document.querySelectorAll(".modal").forEach(modal => {
+        if (event.target == modal) modal.style.display = "none";
+      });
+    }
+  </script>
+
+</body>
+</html>
