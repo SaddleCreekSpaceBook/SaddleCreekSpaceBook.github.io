@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Management Page</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      min-height: 100vh;
+      overflow-y: auto;
+      padding-top: 70px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #FFFFFF;
+      padding: 10px 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      z-index: 1000;
+    }
+    .header .logo {
+      height: 55px;
+      margin-left: -20px;
+    }
+    .header .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+      padding-right: 30px;
+    }
+    .header .user-icon {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      background-color: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #555;
+      border: 1px solid #ccc;
+    }
+    .menu-sidebar {
+      width: 40px;
+      background-color: #00843D;
+      color: #fff;
+      padding: 20px 10px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      transition: width 0.3s;
+      height: calc(100vh - 70px);
+      position: fixed;
+      top: 70px;
+      left: 0;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+      scrollbar-width: none; /* Hide scrollbar for Firefox */
+    }
+    .menu-sidebar::-webkit-scrollbar {
+      display: none; /* Hide scrollbar for Chrome/Safari */
+    }
+    .menu-sidebar.expanded {
+      width: 250px;
+      align-items: flex-start;
+      padding-left: 20px;
+    }
+    
+    /* Search container */
+    .search-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .search-icon {
+      cursor: pointer;
+      padding: 0px;
+      border-radius: 5px;
+      transition: transform 0.2s ease-in-out;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 40px;
+      height: 40px;
+    }
+    .search-icon:hover {
+      transform: scale(1.2);
+    }
+    .search-bar {
+      display: none;
+      width: calc(100% - 50px);
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      background-color: rgba(255,255,255,0.9);
+      color: #333;
+      font-size: 14px;
+      margin-left: 10px;
+      transition: all 0.3s ease;
+    }
+    .menu-sidebar.expanded .search-bar {
+      display: block;
+    }
+    
+    /* Menu sections */
+    .menu-section {
+      width: 100%;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .menu-sidebar.expanded .menu-section {
+      display: block;
+    }
+    .menu-section-title {
+      color: rgba(255,255,255,0.7);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      display: none;
+      padding-left: 10px;
+    }
+    .menu-sidebar.expanded .menu-section-title {
+      display: block;
+    }
+    
+    /* Menu items */
+    .menu-item {
+      display: none;
+      align-items: center;
+      padding: 10px;
+      margin-bottom: 5px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: all 0.2s ease-in-out;
+      width: calc(100% - 20px);
+      box-sizing: border-box;
+    }
+    .menu-sidebar.expanded .menu-item {
+      display: flex;
+    }
+    .menu-item:hover {
+      background-color: #007336;
+    }
+    .menu-item.active {
+      background-color: #00602b;
+    }
+    .menu-icon {
+      font-size: 24px;
+      min-width: 30px;
+      display: flex;
+      justify-content: center;
+      padding: 5px;
+    }
+    .menu-text {
+      font-size: 15px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    /* Expandable menu items */
+    .menu-item.expandable {
+      position: relative;
+    }
+    .menu-item.expandable::after {
+      content: "expand_more";
+      font-family: 'Material Symbols Outlined';
+      position: absolute;
+      right: 10px;
+      transition: transform 0.2s ease;
+    }
+    .menu-item.expandable.active::after {
+      transform: rotate(180deg);
+    }
+    .menu-item.expandable.active + .sublinks {
+      display: block;
+    }
+    .sublinks {
+      display: none;
+      width: 100%;
+      padding-left: 15px;
+      margin-top: 5px;
+      list-style: none;
+    }
+    .sublinks li {
+      padding: 8px 10px;
+      margin-bottom: 2px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sublinks li:hover {
+      background-color: rgba(255,255,255,0.1);
+    }
+    .sublinks li::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background-color: rgba(255,255,255,0.7);
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    /* Settings icon */
+    .settings-icon {
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 5px;
+      transition: transform 0.2s ease-in-out;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-width: 40px;
+      height: 40px;
+      margin-top: auto;
+      margin-bottom: 35px;
+    }
+    .settings-icon:hover {
+      transform: scale(1.2);
+    }
+    .menu-sidebar.expanded .settings-icon {
+      display: flex;
+    }
+    .material-symbols-outlined {
+      font-size: 30px;
+      font-weight: 900;
+      color: #d9d9d6;
+    }
+    .tab-container {
+      margin: 10px 20px 20px 70px;
+      display: flex;
+      flex-direction: column;
+    }
+    .tabs-wrapper {
+      background-color: #f4f4f4;
+      padding: 4px 4px 0;
+    }
+    .tabs {
+      display: flex;
+      gap: 2px;
+    }
+    .tab-item {
+      text-align: center;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 4px 4px 0 0;
+      background-color: #f2f2f2;
+      color: #666;
+      font-weight: 500;
+    }
+    .tab-item.active {
+      background-color: #e6f8ed;
+      color: #00602b;
+      font-weight: bold;
+      border-bottom: 3px solid #00843D;
+    }
+    .tab-content {
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .bubble {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    .row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+    }
+    select, input[type="text"] {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    select:focus, input:focus {
+      border-color: #00843D;
+      outline: none;
+    }
+    button {
+      padding: 10px 16px;
+      background-color: #00843D;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover {
+      background-color: #006e31;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.3s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #00843D;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    .row > div {
+      flex: 1;
+      min-width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <img src="https://github.com/SaddleCreekSpaceBook/SaddleCreekSpaceBook.github.io/blob/main/img/Saddle-Creek-Logo.png?raw=true" alt="Company Logo" class="logo" />
+    <div class="user-info">
+      <div class="user-details">
+        <div>Username</div>
+        <div style="font-size: 12px; color: gray;">Position</div>
+      </div>
+      <div class="user-icon">👤</div>
+    </div>
+  </header>
+
+  <!-- Main Menu Sidebar -->
+  <div class="menu-sidebar" id="menuSidebar">
+    <div class="search-container">
+      <div class="search-icon" id="searchIcon">
+        <span class="material-symbols-outlined">search</span>
+      </div>
+      <input type="text" class="search-bar" placeholder="Search pages..." id="searchBar">
+    </div>
+    
+    <div class="menu-section">
+      <div class="menu-section-title">Navigation</div>
+      <div class="menu-item" onclick="window.location.href='Home_Page.html'">
+        <span class="menu-icon material-symbols-outlined">home</span>
+        <span class="menu-text">Home</span>
+      </div>
+      <div class="menu-item" onclick="window.location.href='Data_Entry.html'">
+        <span class="menu-icon material-symbols-outlined">edit_note</span>
+        <span class="menu-text">Data Entry</span>
+      </div>
+      <div class="menu-item" onclick="window.location.href='Empty_Page_Template.html'">
+        <span class="menu-icon material-symbols-outlined">insights</span>
+        <span class="menu-text">Reports</span>
+      </div>
+    </div>
+    
+    <div class="menu-section">
+      <div class="menu-section-title">Management</div>
+      <div class="menu-item expandable active" id="managementMenu">
+        <span class="menu-icon material-symbols-outlined">settings_suggest</span>
+        <span class="menu-text">Management</span>
+      </div>
+      <ul class="sublinks" id="managementSublinks" style="display: block;">
+        <li onclick="window.location.href='Building_Management.html'">Manage Buildings</li>
+        <li onclick="window.location.href='Warehouse_Management.html'">Manage Warehouse</li>
+        <li onclick="window.location.href='Customer_Management.html'">Manage Customers</li>
+        <li onclick="window.location.href='Associations_management.html'">Manage Associations</li>
+      </ul>
+    </div>
+    
+    <div class="menu-section">
+      <div class="menu-section-title">Administration</div>
+      <div class="menu-item expandable" id="adminMenu">
+        <span class="menu-icon material-symbols-outlined">admin_panel_settings</span>
+        <span class="menu-text">Administration</span>
+      </div>
+      <ul class="sublinks" id="adminSublinks">
+        <li onclick="window.location.href='Campus_Management_Admin.html'">Manage Campus</li>
+        <li onclick="window.location.href='CustomerClasses_Management_Admin.html'">Manage Customer Classes</li>
+        <li onclick="window.location.href='WarehouseAreaType_Management_Admin.html'">Manage Warehouse Area Types</li>
+        <li onclick="window.location.href='User_Management_Admin.html'">Manage Users</li>
+        <li onclick="window.location.href='User-CampusAssociations_Management_Admin.html'">Manage User-Campus Associations</li>
+        <li onclick="window.location.href='Unsubmit_Building_Admin.html'">Unsubmit Building</li>
+      </ul>
+    </div>
+    
+    <div class="settings-icon" id="settingsIcon" onclick="window.location.href='Empty_Page_Template.html'">
+      <span class="material-symbols-outlined">settings</span>
+    </div>
+  </div>
+
+  <!-- Tab Container -->
+  <div class="tab-container" id="tabContainer">
+    <div class="tabs-wrapper">
+      <div class="tabs">
+        <div class="tab-item active" id="manageBuildingsTab">Manage Buildings</div>
+        <div class="tab-item" id="manageWarehouseTab">Manage Warehouse</div>
+        <div class="tab-item" id="manageCustomersTab">Manage Customers</div>
+        <div class="tab-item" id="manageAssociationsTab">Manage Associations</div>
+      </div>
+    </div>
+    <div class="tab-content" id="tabContent">
+      <!-- Content dynamically loaded based on active tab -->
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    // Toggle expansion of the main menu sidebar
+    document.getElementById('searchIcon').addEventListener('click', function() {
+      document.getElementById('menuSidebar').classList.toggle('expanded');
+    });
+
+    // Expandable menu functionality
+    document.getElementById('managementMenu').addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.classList.toggle('active');
+      document.getElementById('managementSublinks').style.display = 
+        this.classList.contains('active') ? 'block' : 'none';
+    });
+    
+    document.getElementById('adminMenu').addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.classList.toggle('active');
+      document.getElementById('adminSublinks').style.display = 
+        this.classList.contains('active') ? 'block' : 'none';
+    });
+    
+    // Search functionality
+    document.getElementById('searchBar').addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      const menuItems = document.querySelectorAll('.menu-item, .sublinks li');
+      
+      menuItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+          item.style.display = 'flex';
+          // Ensure parent sections are visible
+          let parent = item.closest('.menu-section');
+          if (parent) parent.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+
+    // Expand sidebar and management menu on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      // Remove the automatic sidebar expansion
+      // document.getElementById('menuSidebar').classList.add('expanded');
+      document.getElementById('managementMenu').classList.add('active');
+      document.getElementById('managementSublinks').style.display = 'block';
+      
+      // Ensure the building management content is loaded immediately
+      loadContent('manageBuildingsTab');
+    });
+
+    // Tab switching logic
+    const tabs = document.querySelectorAll('.tab-item');
+    const tabContent = document.getElementById('tabContent');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function () {
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Navigate to the corresponding page
+        switch(this.id) {
+          case 'manageBuildingsTab':
+            // Stay on current page
+            loadContent(this.id);
+            break;
+          case 'manageWarehouseTab':
+            window.location.href = 'Warehouse_Management.html';
+            break;
+          case 'manageCustomersTab':
+            window.location.href = 'Customer_Management.html';
+            break;
+          case 'manageAssociationsTab':
+            window.location.href = 'Associations_management.html';
+            break;
+        }
+      });
+    });
+    function loadContent(tabId) {
+      let content = '';
+      switch (tabId) {
+        case 'manageBuildingsTab':
+          content = '<h2>Manage Buildings</h2><p>Building content goes here.</p>';
+          break;
+        case 'manageWarehouseTab':
+          content = '<h2>Manage Warehouse</h2><p>Warehouse content goes here.</p>';
+          break;
+        case 'manageCustomersTab':
+          content = '<h2>Manage Customers</h2><p>Customer management content goes here.</p>';
+          break;
+        case 'manageAssociationsTab':
+          content = '<h2>Manage Associations</h2><p>Associations content goes here.</p>';
+          break;
+      }
+      tabContent.innerHTML = content;
+    }
+
+    function loadContent(tabId) {
+      let content = '';
+      switch(tabId) {
+          case 'manageBuildingsTab':
+          content = `
+        <h2>Manage Buildings</h2>
+        <div class="row" style="align-items: flex-start; gap: 40px;">
+          <!-- LEFT BUBBLE -->
+          <div class="bubble column" style="flex: 1;">
+            <div class="row">
+              <div class="column">
+                <label for="campusSelect">Select Campus</label>
+                <select id="campusSelect">
+                  <option value="">-- Choose a Campus --</option>
+                <option value="campusA">Campus A</option>
+                <option value="campusB">Campus B</option>
+                <option value="campusC">Campus C</option>
+                </select>
+              </div>
+              <div class="column">
+                <label for="buildingSelect">Select Building</label>
+                <select id="buildingSelect">
+                  <option value="">-- Choose a Campus --</option>
+                <option value="buildingA">Building A</option>
+                <option value="buildingB">Building B</option>
+                <option value="buildingC">Building C</option>
+                </select>
+              </div>
+            </div>
+            <style="margin-top: 20px;">
+            <div class="row" style="margin-top: 20px;">
+              <div class="column">
+                <button style="width: 100%;">Add Buildings</button>
+              </div>
+            </div>
+          </div>
+
+          
+          <!-- RIGHT BUBBLE -->
+          <div class="bubble column" style="flex: 2;">
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+              <label style="margin-right: 10px; font-weight: bold;">Active:</label>
+              <label class="switch">
+                <input type="checkbox" id="buildingStatus" checked />
+                <span class="slider round"></span>
+              </label>
+            </div>
+            <div class="row" style="gap: 40px;">
+              <div class="column">
+                <label for="buildingName">Building Name</label>
+                <input id="buildingName" type="text" />
+              </div>
+              <div class="column">
+                <label for="buildingCode">Building Code</label>
+                <input id="buildingCode" type="text" style="width: 90%;" />
+              </div>
+            </div>
+            <style="margin-top: 20px;">
+            <div class="row" style="margin-top: 20px;">
+              <div class="column">
+                <label for="totalSpace">Total Space</label>
+                <input id="totalSpace" type="text" style="width: 95%;" />
+              </div>
+            </div>
+            <div class="actions"  style="margin-top: 20px;">
+              <div class="row" style="justify-content: flex-end; gap: 10px;">
+                    <button>Reset</button>
+                    <button>Submit</button>
+            </div>
+          </div>
+        </div>`;
+          break;
+        case 'manageWarehouseTab':
+          content = '<h2>Manage Warehouse</h2><p>Content for managing warehouse information.</p>';
+          break;
+        case 'manageCustomersTab':
+          content = '<h2>Manage Customers</h2><p>Content for managing customer information.</p>';
+          break;
+        case 'manageAssociationsTab':
+          content = '<h2>Manage Associations</h2><p>Content for managing associations.</p>';
+          break;
+        case 'manageAssociationsTab':
+          content = '<h2>Manage Associations</h2><p>Content for managing associations.</p>';
+          break;
+      }
+      tabContent.innerHTML = content;
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        tabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        loadContent(this.id);
+      });
+    });
+
+    loadContent('manageBuildingsTab');
+  </script>
+</body>
+</html>
