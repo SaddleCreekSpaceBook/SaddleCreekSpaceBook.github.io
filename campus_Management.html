@@ -358,124 +358,134 @@
     </div>
   </div>
 
-  <script>
-// Toggle expansion of the main menu sidebar
-    document.getElementById('searchIcon').addEventListener('click', function() {
-      document.getElementById('menuSidebar').classList.toggle('expanded');
-    });
-    const tabs = document.querySelectorAll('.tab-item');
-    const tabContents = document.querySelectorAll('.tab-pane');
-    const campusDataStore = {};
+<script>
+  const campusDataStore = {};
+  const socket = new WebSocket("ws://10.221.82.63:8080"); // Change to your actual IP/Port
 
-    tabs.forEach(tab => {
-      tab.addEventListener('click', function () {
-        tabs.forEach(item => item.classList.remove('active'));
-        tab.classList.add('active');
+  socket.onopen = () => {
+    console.log("WebSocket connected");
+    // Auto-pull all campuses on load
+    const pullAll = `pull@campus@*@"1=1"`;
+    socket.send(pullAll);
+  };
 
-        tabContents.forEach(content => content.style.display = 'none');
-        const activeTabContent = document.getElementById(tab.id + 'Content');
-        activeTabContent.style.display = 'block';
-      });
-    });
+  socket.onerror = (err) => {
+    console.error("WebSocket error:", err);
+  };
 
-    document.getElementById("campusSearch").addEventListener("input", function () {
-      const selectedValue = this.value;
-      const dataList = document.getElementById("campusList").options;
-      let isValid = false;
+ socket.onmessage = (event) => {
+  console.log("Received:", event.data);
 
-      for (let i = 0; i < dataList.length; i++) {
-        if (dataList[i].value === selectedValue) {
-          isValid = true;
-          break;
-        }
+  const lines = event.data.trim().split("\n");
+  const campusList = document.getElementById("campusList");
+
+  lines.forEach((line) => {
+    const fields = line.split("@");
+    if (fields.length >= 5) {
+      const campus_id = fields[1];
+      const campus_name = fields[2];
+      const campus_cost_center = fields[3];
+      const campus_active = fields[4];
+
+      if (!campusDataStore[campus_name]) {
+        campusDataStore[campus_name] = {
+          name: campus_name,
+          code: campus_id,
+          cost: campus_cost_center,
+          active: campus_active === "True" || campus_active === "1"
+        };
+
+        const option = document.createElement("option");
+        option.value = campus_name;
+        campusList.appendChild(option);
       }
+    }
+  });
+};
 
-      if (isValid || campusDataStore[selectedValue]) {
-        document.getElementById("campusDetails").style.display = "block";
+  // Handle selection from dropdown
+  document.getElementById("campusSearch").addEventListener("change", function () {
+    const selected = this.value.trim();
+    if (!selected) return;
 
-        if (campusDataStore[selectedValue]) {
-          const saved = campusDataStore[selectedValue];
-          document.getElementById("campusName").value = saved.name;
-          document.getElementById("campusCode").value = saved.code;
-          document.getElementById("costCenter").value = saved.cost;
-          document.getElementById("isActive").checked = saved.active;
-        } else {
-          document.getElementById("campusName").value = selectedValue;
-          document.getElementById("campusCode").value = "";
-          document.getElementById("costCenter").value = "";
-          document.getElementById("isActive").checked = false;
-        }
-      } else {
-        document.getElementById("campusDetails").style.display = "none";
-      }
-    });
+    const pull = `pull@campus@*@"campus_name='${selected}'"`;
+    socket.send(pull);
 
-    document.getElementById("submitCampus").addEventListener("click", function () {
-      const key = document.getElementById("campusSearch").value;
-      if (!key) return alert("Please select a campus.");
+    // If already cached, populate immediately
+    if (campusDataStore[selected]) {
+      const saved = campusDataStore[selected];
+      document.getElementById("campusDetails").style.display = "block";
+      document.getElementById("campusName").value = saved.name;
+      document.getElementById("campusCode").value = saved.code;
+      document.getElementById("costCenter").value = saved.cost;
+      document.getElementById("isActive").checked = saved.active;
+    }
+  });
 
-      campusDataStore[key] = {
-        name: document.getElementById("campusName").value,
-        code: document.getElementById("campusCode").value,
-        cost: document.getElementById("costCenter").value,
-        active: document.getElementById("isActive").checked,
-      };
+  // Submit new or updated campus
+  document.getElementById("submitCampus").addEventListener("click", () => {
+    const key = document.getElementById("campusSearch").value.trim();
+    if (!key) return alert("Please select a campus.");
 
-      alert(`Campus '${key}' saved successfully!`);
-    });
+    const payload = {
+      campus_name: document.getElementById("campusName").value.trim(),
+      campus_id: document.getElementById("campusCode").value.trim(),
+      campus_cost_center: document.getElementById("costCenter").value.trim(),
+      campus_active: document.getElementById("isActive").checked ? 1 : 0
+    };
 
-    document.getElementById("cancelCampus").addEventListener("click", function () {
-      document.getElementById("campusSearch").value = "";
-      document.getElementById("campusName").value = "";
-      document.getElementById("campusCode").value = "";
-      document.getElementById("costCenter").value = "";
-      document.getElementById("isActive").checked = false;
-      document.getElementById("campusDetails").style.display = "none";
-    });
+    const pushCommand = `push@campus@${JSON.stringify([payload])}`;
+    socket.send(pushCommand);
+    alert(`Campus '${key}' saved and pushed to database!`);
+  });
 
-    document.getElementById("toggleAddCampus").addEventListener("click", () => {
-      const form = document.getElementById("newCampusForm");
-      form.style.display = form.style.display === "none" ? "block" : "none";
-    });
+  // Cancel/reset form
+  document.getElementById("cancelCampus").addEventListener("click", () => {
+    document.getElementById("campusSearch").value = "";
+    document.getElementById("campusName").value = "";
+    document.getElementById("campusCode").value = "";
+    document.getElementById("costCenter").value = "";
+    document.getElementById("isActive").checked = false;
+    document.getElementById("campusDetails").style.display = "none";
+  });
 
-document.getElementById("addCampusBtn").addEventListener("click", () => {
-  const input = document.getElementById("newCampusInput");
-  const newCampusName = input.value.trim();
+  // Toggle new campus form
+  document.getElementById("toggleAddCampus").addEventListener("click", () => {
+    const form = document.getElementById("newCampusForm");
+    form.style.display = form.style.display === "none" ? "block" : "none";
+  });
 
-  if (!newCampusName) {
-    alert("Please enter a campus name.");
-    return;
-  }
+  // Add new campus to datalist
+  document.getElementById("addCampusBtn").addEventListener("click", () => {
+    const input = document.getElementById("newCampusInput");
+    const newCampusName = input.value.trim();
+    const datalist = document.getElementById("campusList");
 
-  const datalist = document.getElementById("campusList");
-  const exists = Array.from(datalist.options).some(option => option.value === newCampusName);
-  if (exists) {
-    alert("Campus already exists.");
-    return;
-  }
+    if (!newCampusName) {
+      alert("Please enter a campus name.");
+      return;
+    }
 
-  // Add to datalist
-  const option = document.createElement("option");
-  option.value = newCampusName;
-  datalist.appendChild(option);
+    if ([...datalist.options].some(opt => opt.value === newCampusName)) {
+      alert("Campus already exists.");
+      return;
+    }
 
-  // Update search input
-  const searchInput = document.getElementById("campusSearch");
-  searchInput.value = "";
-  searchInput.focus();
-  searchInput.value = newCampusName;
+    const option = document.createElement("option");
+    option.value = newCampusName;
+    datalist.appendChild(option);
 
-  // Show form and prefill details
-  document.getElementById("campusDetails").style.display = "block";
-  document.getElementById("campusName").value = newCampusName;
-  document.getElementById("campusCode").value = "";
-  document.getElementById("costCenter").value = "";
-  document.getElementById("isActive").checked = false;
+    document.getElementById("campusSearch").value = newCampusName;
+    document.getElementById("campusDetails").style.display = "block";
+    document.getElementById("campusName").value = newCampusName;
+    document.getElementById("campusCode").value = "";
+    document.getElementById("costCenter").value = "";
+    document.getElementById("isActive").checked = false;
 
-  // Clear form and hide add campus
-  input.value = "";
-  document.getElementById("newCampusForm").style.display = "none";
-});
-	  </script>
+    input.value = "";
+    document.getElementById("newCampusForm").style.display = "none";
+  });
+</script>
+
   </body>
 </html>
